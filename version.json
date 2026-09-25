@@ -1,0 +1,6 @@
+{
+  "version": "2.5.0",
+  "name": "OmniVoice TTS Studio",
+  "release_date": "2026-09-25",
+  "description": "Phòng thu TTS 24kHz, Voice Cloning & Design, Auto Caption, Auto Close Terminal khi đóng trình duyệt, Cloud Sync MongoDB & R2."
+}

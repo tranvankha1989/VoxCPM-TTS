@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.core.config import OUTPUTS_DIR, PRESETS_DIR, logger
+from app.core.config import OUTPUTS_DIR, PRESETS_DIR, APP_VERSION, logger
 from app.core.database import connect_db, close_db
 from app.routers import api_router
 from model_handler import load_model
@@ -44,7 +44,7 @@ app = FastAPI(
         "Text-to-Speech đa ngôn ngữ chất lượng cao 24kHz sử dụng OmniVoice (k2-fsa). "
         "Hỗ trợ Cloud Sync MongoDB & Cloudflare R2 với Fallback LocalStorage."
     ),
-    version="2.2.0",
+    version=APP_VERSION,
 
     lifespan=lifespan,
 )

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { SyncBadge } from "@/components/sync/SyncBadge";
 import { HardwareBadge } from "@/components/hardware/HardwareBadge";
 import { useTTSStore } from "@/store/useTTSStore";
+import { APP_VERSION } from "@/constants/version";
 
 
 const NAV_ITEMS = [
@@ -90,7 +91,7 @@ export function MainLayout() {
                     OmniVoice
                   </h2>
                   <p className="text-[11px] text-on-surface-variant font-mono-data">
-                    Phòng thu Pro v2.4
+                    Phòng thu Pro v{APP_VERSION}
                   </p>
                 </div>
               </Link>

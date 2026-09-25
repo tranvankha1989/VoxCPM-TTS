@@ -46,8 +46,17 @@ git add -A
 # 5. Kiem tra xem co file can commit khong
 $gitStatus = (git status --porcelain 2>&1)
 if ($gitStatus) {
+    $version = "2.5.0"
+    $versionFile = Join-Path $projectDir "version.json"
+    if (Test-Path $versionFile) {
+        try {
+            $vObj = Get-Content $versionFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($vObj.version) { $version = $vObj.version }
+        } catch {}
+    }
+
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $commitMsg = "feat: dong bo ma nguon OmniVoice TTS ($timestamp)"
+    $commitMsg = "feat: [v$version] dong bo ma nguon OmniVoice TTS ($timestamp)"
     Write-Host "[2/3] Dang tao commit moi: '$commitMsg'..." -ForegroundColor Yellow
     git commit -m $commitMsg
 } else {

@@ -4,7 +4,7 @@ from typing import Dict
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse
 
-from app.core.config import OUTPUTS_DIR, logger
+from app.core.config import OUTPUTS_DIR, APP_VERSION, logger
 from app.schemas.common import HealthResponse
 
 router = APIRouter(tags=["System"])
@@ -136,6 +136,7 @@ async def health_check():
     return HealthResponse(
         status="ok",
         model_loaded=is_loaded,
+        version=APP_VERSION,
     )
 
 

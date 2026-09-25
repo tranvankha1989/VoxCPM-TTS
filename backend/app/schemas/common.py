@@ -3,6 +3,7 @@ from pydantic import BaseModel
 class HealthResponse(BaseModel):
     status: str
     model_loaded: bool
+    version: str = "2.5.0"
 
 class EngineItem(BaseModel):
     id: str
