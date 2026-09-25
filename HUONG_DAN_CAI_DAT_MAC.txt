@@ -1,0 +1,25 @@
+========================================================
+   HƯỚNG DẪN CÀI ĐẶT OMNIVOICE TTS TRÊN MACOS (M1/M2/M3/Intel)
+========================================================
+
+1. GIẢI NÉN FILE:
+   - Nhấp đúp vào file zip để giải nén ra một thư mục trên máy Mac của bạn.
+
+2. CÀI ĐẶT 1-CLICK:
+   - Nhấp đúp chuột vào file: "Cai_Dat_macOS.command"
+   - Script sẽ tự động:
+     + Cấu hình môi trường Python tối ưu cho chip Mac.
+     + Cài đặt các thư viện cần thiết.
+     + Tự động tạo biểu tượng ứng dụng "OmniVoice TTS.app" vào thư mục /Applications
+     + Tự động tạo Shortcut ngoài màn hình Desktop của Mac.
+
+3. SỬ DỤNG:
+   - Sau khi cài đặt xong, bạn chỉ cần bấm vào biểu tượng "OmniVoice TTS" 
+     ngoài màn hình Desktop hoặc trong Launchpad để sử dụng!
+   - Ứng dụng sẽ tự động mở trình duyệt web lên để bạn sử dụng.
+
+4. LƯU Ý BẢO MẬT TRÊN MAC (NẾU GẶP THÔNG BÁO SECURITY):
+   - Nếu macOS hỏi "Không thể mở vì file tải từ internet":
+     Vào Cài đặt hệ thống (System Settings) -> Quyền riêng tư & Bảo mật (Privacy & Security) 
+     -> Cuộn xuống dưới chọn "Open Anyway" (Vẫn mở) là được.
+========================================================

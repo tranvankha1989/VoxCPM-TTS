@@ -24,7 +24,5 @@ frontend/dist/
 frontend/.env.local
 frontend/.env.production
 
-# ── Logs & Temp ──────────────────────────────────
-*.log
-*.tmp
-*.bak
+# ── Installer Output ──────────────────────────────
+dist_installer/

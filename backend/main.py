@@ -8,8 +8,10 @@ Swagger UI:
     http://localhost:8000/docs
 """
 
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -30,7 +32,6 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Server đang tắt.")
 
 
-
 app = FastAPI(
     title="OmniVoice TTS API",
     description=(
@@ -38,25 +39,38 @@ app = FastAPI(
         "Hỗ trợ Cloud Sync MongoDB & Cloudflare R2 với Fallback LocalStorage."
     ),
     version="2.2.0",
-
     lifespan=lifespan,
 )
 
 # ─── CORS Middleware ──────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ─── Static Files ─────────────────────────────────────────────────────────────
+# ─── Static Files (Audio Outputs & Presets) ──────────────────────────────────
 app.mount("/outputs", StaticFiles(directory=str(OUTPUTS_DIR)), name="outputs")
 app.mount("/presets", StaticFiles(directory=str(PRESETS_DIR)), name="presets")
 
 # ─── Include API Routers ──────────────────────────────────────────────────────
 app.include_router(api_router)
+
+# ─── Phục vụ Frontend Build (SPA Production Mode) ──────────────────────────────
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if (FRONTEND_DIST / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_spa(full_path: str):
+    """Phục vụ SPA Router hoặc fallback index.html khi chạy chế độ độc lập."""
+    target_file = FRONTEND_DIST / full_path
+    if full_path and target_file.is_file():
+        return FileResponse(target_file)
+    index_file = FRONTEND_DIST / "index.html"
+    if index_file.is_file():
+        return FileResponse(index_file)
+    return {"message": "OmniVoice TTS API đang chạy (Chưa build frontend/dist)"}
+
