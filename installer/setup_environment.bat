@@ -141,7 +141,24 @@ echo ========================================================
 echo   Đang khởi động hệ thống...
 echo.
 
-:: Mở trình duyệt sau 3 giây
+:: Kiểm tra và tự động mở Google Colab nếu đang bật Cloud GPU
+setlocal enabledelayedexpansion
+findstr /i /c:"USE_REMOTE_GPU=true" "%BACKEND_DIR%\.env" >nul 2>nul
+if %errorlevel% equ 0 (
+    echo [INFO] Dang bat che do Cloud GPU. Dang tu dong mo Google Colab tren trinh duyet...
+    set "COLAB_LINK="
+    for /f "tokens=1,* delims==" %%A in ('findstr /i /c:"COLAB_NOTEBOOK_URL" "%BACKEND_DIR%\.env"') do (
+        set "COLAB_LINK=%%B"
+    )
+    if defined COLAB_LINK (
+        start "" "!COLAB_LINK!"
+    ) else (
+        start "" "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"
+    )
+)
+endlocal
+
+:: Mở trình duyệt Web App
 start "" "http://localhost:8000"
 
 :: Khởi chạy backend

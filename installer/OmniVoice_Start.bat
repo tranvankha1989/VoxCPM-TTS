@@ -20,6 +20,13 @@ if not exist "%PYTHON_EXE%" (
 netstat -ano | findstr ":8000" | findstr "LISTENING" >nul 2>nul
 if %errorlevel% equ 0 (
     echo [INFO] Server OmniVoice da san sang. Dang mo trinh duyet...
+    setlocal enabledelayedexpansion
+    findstr /i /c:"USE_REMOTE_GPU=true" "%BACKEND_DIR%\.env" >nul 2>nul
+    if !errorlevel! equ 0 (
+        for /f "tokens=1,* delims==" %%A in ('findstr /i /c:"COLAB_NOTEBOOK_URL" "%BACKEND_DIR%\.env"') do set "COLAB_LINK=%%B"
+        if defined COLAB_LINK (start "" "!COLAB_LINK!") else (start "" "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO")
+    )
+    endlocal
     start "" "http://localhost:8000"
     exit /b
 )
