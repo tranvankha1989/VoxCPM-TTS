@@ -7,6 +7,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 
 import CloningVoice from "./pages/CloningVoice";
 import AutoCaption from "./pages/AutoCaption";
+import Settings from "./pages/Settings";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="cloning-voice" element={<CloningVoice />} />
           <Route path="autocaption" element={<AutoCaption />} />
           <Route path="caption" element={<AutoCaption />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -249,7 +249,36 @@ interface TTSState {
   checkStorageStatus: () => Promise<void>;
   syncAllToCloud: () => Promise<void>;
   fetchFromCloud: () => Promise<void>;
+  hardwareConfig: HardwareConfig;
+  isLoadingHardware: boolean;
+  fetchHardwareSettings: () => Promise<void>;
+  updateHardwareSettings: (data: {
+    use_remote_gpu: boolean;
+    remote_gpu_url: string;
+    remote_concurrency?: number;
+  }) => Promise<boolean>;
+  testRemoteGpuConnection: (url: string) => Promise<TestGpuResult>;
 }
+
+export interface HardwareConfig {
+  use_remote_gpu: boolean;
+  remote_gpu_url: string;
+  remote_concurrency: number;
+  local_device: string;
+  cuda_available: boolean;
+  cuda_device_name: string | null;
+  cuda_vram_gb?: number | null;
+}
+
+export interface TestGpuResult {
+  ok: boolean;
+  gpu_name?: string;
+  vram_total_gb?: number;
+  provider?: string;
+  ping_ms?: number;
+  error?: string;
+}
+
 
 
 export const useTTSStore = create<TTSState>((set, get) => {
@@ -977,6 +1006,63 @@ export const useTTSStore = create<TTSState>((set, get) => {
       } catch (e: any) {
         console.error("Lỗi khi dọn dẹp file rác:", e);
         throw e;
+      }
+    },
+    hardwareConfig: {
+      use_remote_gpu: false,
+      remote_gpu_url: "",
+      remote_concurrency: 2,
+      local_device: "cuda",
+      cuda_available: true,
+      cuda_device_name: null,
+      cuda_vram_gb: null,
+    },
+    isLoadingHardware: false,
+    fetchHardwareSettings: async () => {
+      try {
+        set({ isLoadingHardware: true });
+        const res = await fetch("http://localhost:8000/api/settings/hardware");
+        if (res.ok) {
+          const data: HardwareConfig = await res.json();
+          set({ hardwareConfig: data });
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải cấu hình phần cứng:", err);
+      } finally {
+        set({ isLoadingHardware: false });
+      }
+    },
+    updateHardwareSettings: async (payload) => {
+      try {
+        set({ isLoadingHardware: true });
+        const res = await fetch("http://localhost:8000/api/settings/hardware", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const data: HardwareConfig = await res.json();
+          set({ hardwareConfig: data });
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error("Lỗi khi cập nhật cấu hình phần cứng:", err);
+        return false;
+      } finally {
+        set({ isLoadingHardware: false });
+      }
+    },
+    testRemoteGpuConnection: async (url: string) => {
+      try {
+        const res = await fetch("http://localhost:8000/api/settings/hardware/test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ remote_gpu_url: url }),
+        });
+        return await res.json();
+      } catch (err: any) {
+        return { ok: false, error: err.message || "Lỗi kết nối mạng" };
       }
     },
   }; // end return

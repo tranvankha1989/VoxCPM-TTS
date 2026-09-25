@@ -67,33 +67,40 @@ CUDNN_BENCHMARK = True
 DEFAULT_NUM_STEP = int(os.getenv("DEFAULT_NUM_STEP", "32"))
 AUDIO_MP3_BACKEND = os.getenv("AUDIO_MP3_BACKEND", "auto").lower().strip()
 
-# Cấu hình Remote Cloud GPU Worker (Hugging Face Spaces A100 / Google Colab T4)
-USE_REMOTE_GPU = (
-    os.getenv("USE_REMOTE_GPU", "").lower() in ("true", "1", "yes")
-    or os.getenv("USE_HUGGINGFACE_GPU", "").lower() in ("true", "1", "yes")
-    or os.getenv("USE_COLAB_GPU", "").lower() in ("true", "1", "yes")
-)
-REMOTE_GPU_URL = (
-    os.getenv("REMOTE_GPU_URL")
-    or os.getenv("HUGGINGFACE_GPU_URL")
-    or os.getenv("COLAB_API_URL")
-    or ""
-).rstrip("/")
+def is_remote_gpu_enabled() -> bool:
+    load_dotenv(override=True)
+    return (
+        os.getenv("USE_REMOTE_GPU", "").lower() in ("true", "1", "yes")
+        or os.getenv("USE_HUGGINGFACE_GPU", "").lower() in ("true", "1", "yes")
+        or os.getenv("USE_COLAB_GPU", "").lower() in ("true", "1", "yes")
+    )
+
+def get_remote_gpu_url() -> str:
+    load_dotenv(override=True)
+    return (
+        os.getenv("REMOTE_GPU_URL")
+        or os.getenv("HUGGINGFACE_GPU_URL")
+        or os.getenv("COLAB_API_URL")
+        or ""
+    ).rstrip("/")
 
 # Tương thích ngược
+USE_REMOTE_GPU = is_remote_gpu_enabled()
+REMOTE_GPU_URL = get_remote_gpu_url()
 USE_COLAB_GPU = USE_REMOTE_GPU
 COLAB_API_URL = REMOTE_GPU_URL
 
 
 def _remote_url(endpoint: str) -> str:
     """Tạo URL chính xác cho Remote Worker (Hugging Face Spaces dùng prefix /gradio_api/remote/, Colab dùng /api/remote/)."""
-    base = REMOTE_GPU_URL.rstrip("/")
+    base = get_remote_gpu_url()
     endpoint = endpoint.strip("/")
     if "/remote/" in base:
         return f"{base}/{endpoint}"
     if "hf.space" in base.lower():
         return f"{base}/gradio_api/remote/{endpoint}"
     return f"{base}/api/remote/{endpoint}"
+
 
 
 def _remote_headers() -> dict[str, str]:
@@ -119,7 +126,7 @@ def load_model() -> None:
         return
 
     # ─── Chế độ Cloud GPU Worker (Hugging Face / Colab) ───────────────────────────
-    if USE_REMOTE_GPU and REMOTE_GPU_URL:
+    if is_remote_gpu_enabled() and get_remote_gpu_url():
         target_health = _remote_url("health")
         logger.info(f"🌐 Đang kiểm tra kết nối Cloud GPU tại: {target_health} …")
         try:
@@ -253,7 +260,7 @@ def create_voice_prompt(ref_audio: str, ref_text: str | None = None) -> VoiceClo
     Trích xuất đặc trưng âm thanh và tạo VoiceClonePrompt.
     Nếu ref_text là None hoặc rỗng, OmniVoice sẽ tự động dùng Whisper ASR để bóc băng.
     """
-    if USE_REMOTE_GPU and REMOTE_GPU_URL:
+    if is_remote_gpu_enabled() and get_remote_gpu_url():
         return _create_voice_prompt_remote(ref_audio, ref_text)
 
     with _model_lock:
@@ -822,7 +829,7 @@ def generate_audio(
         num_step = int(os.getenv("DEFAULT_NUM_STEP", str(DEFAULT_NUM_STEP)))
 
     # ─── Nếu bật Remote Cloud GPU: Uỷ quyền xử lý sang Hugging Face / Colab ─
-    if USE_REMOTE_GPU and REMOTE_GPU_URL:
+    if is_remote_gpu_enabled() and get_remote_gpu_url():
         with _remote_semaphore:
             _generate_audio_remote(
                 text=text,

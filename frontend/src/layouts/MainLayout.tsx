@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SyncBadge } from "@/components/sync/SyncBadge";
+import { HardwareBadge } from "@/components/hardware/HardwareBadge";
 import { useTTSStore } from "@/store/useTTSStore";
 
 
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
   { path: "/cloning-voice", label: "Tạo giọng mới", icon: "record_voice_over" },
   { path: "/autocaption", label: "Auto Caption", icon: "subtitles" },
   { path: "/projects", label: "Dự án", icon: "folder_shared" },
+  { path: "/settings", label: "Cài đặt & GPU", icon: "settings" },
 ];
 
 export function MainLayout() {
@@ -161,8 +163,13 @@ export function MainLayout() {
           })}
         </ul>
 
-        {/* Sync & Storage Status Footer */}
-        <div className="mt-auto pt-3 border-t border-white/10 w-full">
+        {/* Sync & Hardware Status Footer */}
+        <div className="mt-auto pt-3 border-t border-white/10 w-full space-y-2">
+          {!isCollapsed && (
+            <div className="px-1 flex justify-center">
+              <HardwareBadge />
+            </div>
+          )}
           <SyncBadge isCollapsed={isCollapsed} />
         </div>
       </nav>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FolderPlus, Plus, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { FolderPlus, Plus, X, Cpu, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useTTSStore, type Project } from "../../store/useTTSStore";
 
@@ -353,6 +354,29 @@ export const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
                 ? "Tối ưu mức năng lượng to rõ hơn (-14 LUFS) phù hợp video nền YouTube, TikTok & Reels."
                 : "Chuẩn hóa theo đỉnh sóng cao nhất truyền thống (-1.0 dBFS)."}
           </p>
+        </div>
+
+        {/* Bộ xử lý GPU (Local / Cloud) */}
+        <div className="flex items-center justify-between p-3.5 rounded-xl bg-surface-dim border border-white/10 hover:border-primary/30 transition-all">
+          <div className="space-y-0.5">
+            <span className="font-label-caps text-xs text-on-surface flex items-center gap-1.5 font-medium">
+              <Cpu className="w-3.5 h-3.5 text-primary" />
+              Bộ Xử Lý (Engine)
+            </span>
+            <p className="text-[10px] text-on-surface-variant font-mono">
+              {useTTSStore.getState().hardwareConfig.use_remote_gpu
+                ? "Cloud GPU (Tesla T4)"
+                : useTTSStore.getState().hardwareConfig.cuda_device_name || "NVIDIA GTX 1650 (4GB)"}
+            </p>
+          </div>
+          <Link
+            to="/settings"
+            className="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 text-primary font-semibold flex items-center gap-1 transition-all"
+            title="Mở cài đặt chuyển đổi GPU Local và Cloud GPU"
+          >
+            Đổi GPU
+            <ExternalLink className="w-3 h-3" />
+          </Link>
         </div>
       </div>
 

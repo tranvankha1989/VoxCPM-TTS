@@ -8,15 +8,7 @@
     "prompt_text": "Xin chào, mình là Minh Quân Pro, một dọc độc được tối ưu cho khả năng có suy trình giữa tiếng việt và tiếng lang.  Với chắc dọc tự nhiên, mượt mà những người thật cùng khả năng chuyển ngữ liền mạc.",
     "url": "http://localhost:8000/presets/custom/custom_7fd3a2c1.wav"
   },
-  {
-    "id": "custom_fe662990",
-    "name": "Tony",
-    "gender": "female",
-    "description": "Giọng tự tạo",
-    "icon": "record_voice_over",
-    "prompt_text": "Với thu nhập hiện nay là sáu triệu đồng, tức ba trăm đô la Mỹ, ở Sài Gòn",
-    "url": "http://localhost:8000/presets/custom/custom_fe662990.wav"
-  },
+
   {
     "id": "custom_0bc4de90",
     "name": "Nhật Phong",
@@ -36,5 +28,18 @@
     "prompt_text": "Chúng ta đang sống trong thời đại của trí tuệ nhân tạo. Mọi lĩnh vực từ giáo dục, y tế đến sáng tạo nghệ thuật đều đang thay đổi nhanh chóng.",
     "url": "http://localhost:8000/presets/custom/custom_3f916630.wav",
     "has_prompt_pt": true
+  },
+  {
+    "id": "custom_a4c589c2",
+    "name": "Tony V2",
+    "gender": "female",
+    "description": "Giọng tự tạo (Đa mẫu)",
+    "icon": "record_voice_over",
+    "url": "http://localhost:8000/presets/custom/custom_a4c589c2.wav",
+    "prompt_text": "",
+    "type": "custom",
+    "has_cache_pt": true,
+    "samples_count": 1,
+    "duration": 6.6
   }
 ]
