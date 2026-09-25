@@ -52,10 +52,10 @@ if (Test-Path $envFile) {
         $colabUrl = "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"
     }
 
-    # Nếu USE_REMOTE_GPU=true và REMOTE_GPU_URL có dạng ngrok-free.dev (không trỏ đến Hugging Face)
-    if ($useRemote -and ($remoteUrl -like "*ngrok-free.dev*" -or $remoteUrl -like "*ngrok-free.app*") -and ($remoteUrl -notlike "*hf.space*") -and ($remoteUrl -notlike "*huggingface*")) {
-        Write-Host "⚡ Phat hien Remote GPU dang dung Ngrok ($remoteUrl)." -ForegroundColor Yellow
-        Write-Host "👉 Tu dong mo Google Colab de ban bam khoi dong GPU..." -ForegroundColor Cyan
+    # Nếu USE_REMOTE_GPU=true và không trỏ đến Hugging Face -> Luôn tự động mở Google Colab
+    if ($useRemote -and ($remoteUrl -notlike "*hf.space*") -and ($remoteUrl -notlike "*huggingface*")) {
+        Write-Host "⚡ Phat hien he thong dang bat che do Cloud GPU." -ForegroundColor Yellow
+        Write-Host "👉 Tu dong mo trinh duyet Google Colab: $colabUrl" -ForegroundColor Cyan
         Start-Process $colabUrl
     } elseif ($useRemote -and ($remoteUrl -like "*hf.space*" -or $remoteUrl -like "*huggingface*")) {
         Write-Host "⚡ Remote GPU dang tro den Hugging Face ($remoteUrl). Khoi dong Backend & Frontend binh thuong!" -ForegroundColor Green
