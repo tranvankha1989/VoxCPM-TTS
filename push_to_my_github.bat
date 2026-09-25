@@ -4,7 +4,7 @@ cd /d "%~dp0"
 
 echo ===================================================================
 echo   DANG DAY TOAN BO DU AN LEN GITHUB:
-echo   https://github.com/tranvankha1989/self-tts.git
+echo   https://github.com/tranvankha1989/VoxCPM-TTS.git
 echo ===================================================================
 echo.
 echo Neu trinh duyet bat len hop thoai dang nhap GitHub, ban chi can
@@ -25,7 +25,7 @@ if errorlevel 1 (
     echo ===================================================================
     echo   [THANH CONG 100%%]
     echo   Toan bo ma nguon da duoc day len GitHub cua ban:
-    echo   https://github.com/tranvankha1989/self-tts
+    echo   https://github.com/tranvankha1989/VoxCPM-TTS
     echo ===================================================================
 )
 
