@@ -6,7 +6,7 @@
 #define MyAppName "OmniVoice TTS Studio"
 #define MyAppVersion "2.2.0"
 #define MyAppPublisher "Tran Van Kha"
-#define MyAppURL "https://github.com/tranvankha1989/VoxCPM-TTS-tts"
+#define MyAppURL "https://github.com/tranvankha1989/self-tts"
 #define MyAppExeName "OmniVoice_Start.bat"
 
 [Setup]
