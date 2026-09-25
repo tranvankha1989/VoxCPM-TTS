@@ -1,32 +1,33 @@
 @echo off
-chcp 65001 >nul
-title Day code de len GitHub (tranvankha1989/self-tts)
+setlocal
 cd /d "%~dp0"
 
 echo ===================================================================
-echo   DANG DAY TOAN BO DU AN DE LEN GITHUB CUA BAN:
+echo   DANG DAY TOAN BO DU AN LEN GITHUB:
 echo   https://github.com/tranvankha1989/self-tts.git
 echo ===================================================================
 echo.
 echo Neu trinh duyet bat len hop thoai dang nhap GitHub, ban chi can
-echo bam nut: "Sign in with your browser" de xac nhan 1 lan duy nhat.
+echo bam nut: "Sign in with your browser" de xac nhan.
 echo.
 
 git push -u origin main --force
 
-echo.
-if %errorlevel% equ 0 (
+if errorlevel 1 (
+    echo.
     echo ===================================================================
-    echo   🎉 THANH CONG 100%!
-    echo   Toan bo ma nguon da duoc day va ghi de len GitHub cua ban:
-    echo   👉 https://github.com/tranvankha1989/self-tts
+    echo   [THAT BAI] CHUA THE DAY LEN GITHUB!
+    echo   1. Hay kiem tra xem ban da dang nhap GitHub tren trinh duyet chua.
+    echo   2. Kiem tra lai ket noi mang va repo tren GitHub.
     echo ===================================================================
 ) else (
+    echo.
     echo ===================================================================
-    echo   ❌ CO LOI XAY RA:
-    echo   1. Hay kiem tra xem ban da tao repo 'self-tts' tren GitHub chua.
-    echo   2. Xac nhan dang nhap tren trinh duyet neu duoc hoi.
+    echo   [THANH CONG 100%%]
+    echo   Toan bo ma nguon da duoc day len GitHub cua ban:
+    echo   https://github.com/tranvankha1989/self-tts
     echo ===================================================================
 )
+
 echo.
 pause
