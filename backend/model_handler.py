@@ -13,7 +13,6 @@ Chứa toàn bộ logic liên quan đến OmniVoice (k2-fsa):
 import os
 import gc
 import re
-import time
 import logging
 import threading
 import functools
@@ -112,39 +111,6 @@ def _remote_headers() -> dict[str, str]:
     }
 
 
-_last_remote_check_time: float = 0.0
-_last_remote_check_result: bool = False
-
-
-def is_remote_gpu_connected(force_check: bool = False) -> bool:
-    """Kiểm tra xem Cloud GPU (Google Colab / Hugging Face) đã online và sẵn sàng nhận lệnh chưa."""
-    global _last_remote_check_time, _last_remote_check_result
-    if not is_remote_gpu_enabled() or not get_remote_gpu_url():
-        return False
-
-    now = time.time()
-    # Cache kết quả kiểm tra trong 2.5 giây để tránh flood request tới Colab/Ngrok
-    if not force_check and (now - _last_remote_check_time < 2.5):
-        return _last_remote_check_result
-
-    _last_remote_check_time = now
-    target_health = _remote_url("health")
-    try:
-        import httpx
-        resp = httpx.get(target_health, headers=_remote_headers(), timeout=3.0)
-        _last_remote_check_result = (resp.status_code == 200)
-    except Exception:
-        _last_remote_check_result = False
-    return _last_remote_check_result
-
-
-def is_system_ai_ready() -> bool:
-    """Kiểm tra tổng thể xem hệ thống AI đã sẵn sàng hoạt động (GPU Cloud online HOẶC Local Model đã nạp)."""
-    if is_remote_gpu_enabled():
-        return is_remote_gpu_connected()
-    return _model is not None
-
-
 _has_warmed_up = False
 
 
@@ -194,10 +160,6 @@ def load_model() -> None:
         if CUDNN_BENCHMARK:
             torch.backends.cudnn.benchmark = True
             logger.info("⚡ Đã bật torch.backends.cudnn.benchmark để tối ưu tốc độ tính toán ma trận.")
-    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        device_map = "mps"
-        dtype_val = torch.float32
-        logger.info("🍎 Đã kích hoạt tăng tốc phần cứng Apple Silicon Metal (MPS).")
     else:
         device_map = "cpu"
         dtype_val = torch.float32

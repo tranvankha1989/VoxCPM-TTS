@@ -4,11 +4,7 @@ import {
   FileUp,
   UploadCloud,
   CheckCircle2,
-  Save,
   RotateCcw,
-  Sparkles,
-  Clock,
-  FileText,
   X,
 } from "lucide-react";
 import { NON_VERBAL_SYMBOLS } from "../../constants/studio";
@@ -21,8 +17,8 @@ interface StudioTextInputProps {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   onOpenPauseModal?: () => void;
   onOpenPronunciationModal?: () => void;
-  pauseSettings: PauseSettings;
-  pronunciationWords: PronunciationWord[];
+  pauseSettings?: PauseSettings;
+  pronunciationWords?: PronunciationWord[];
   isLoading: boolean;
   elapsedTime: number;
   generationProgress: { current: number; total: number };
@@ -34,10 +30,10 @@ export const StudioTextInput: React.FC<StudioTextInputProps> = ({
   text,
   onChangeText,
   textareaRef,
-  onOpenPauseModal,
-  onOpenPronunciationModal,
-  pauseSettings,
-  pronunciationWords,
+  onOpenPauseModal: _onOpenPauseModal,
+  onOpenPronunciationModal: _onOpenPronunciationModal,
+  pauseSettings: _pauseSettings,
+  pronunciationWords: _pronunciationWords,
   isLoading,
   elapsedTime,
   generationProgress,

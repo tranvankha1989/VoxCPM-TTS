@@ -13,7 +13,6 @@ import {
   UploadCloud,
   FileAudio,
   Sparkles,
-  Info,
   CheckCircle2,
   AlertCircle,
   Sliders,

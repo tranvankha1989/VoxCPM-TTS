@@ -17,12 +17,8 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
   pinnedVoices,
   onTogglePin,
 }) => {
-  const carouselRef = useRef<HTMLDivElement>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [isDown, setIsDown] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [startScrollLeft, setStartScrollLeft] = useState(0);
   const [gender, setGender] = useState<"all" | "male" | "female">("all");
   const [voiceType, setVoiceType] = useState<"all" | "preset" | "custom">("all");
   const [playingPreviewUrl, setPlayingPreviewUrl] = useState<string | null>(null);
@@ -42,25 +38,6 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
       }
     };
   }, []);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDown(true);
-    if (carouselRef.current) {
-      setStartX(e.pageX - carouselRef.current.offsetLeft);
-      setStartScrollLeft(carouselRef.current.scrollLeft);
-    }
-  };
-
-  const handleMouseLeave = () => setIsDown(false);
-  const handleMouseUp = () => setIsDown(false);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDown || !carouselRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - carouselRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    carouselRef.current.scrollLeft = startScrollLeft - walk;
-  };
 
   const handleScrollLeftArrow = () => {
     setCurrentPage((p) => Math.max(0, p - 1));

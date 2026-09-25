@@ -256,7 +256,6 @@ interface TTSState {
     use_remote_gpu: boolean;
     remote_gpu_url: string;
     remote_concurrency?: number;
-    colab_notebook_url?: string;
   }) => Promise<boolean>;
   testRemoteGpuConnection: (url: string) => Promise<TestGpuResult>;
 }
@@ -265,7 +264,6 @@ export interface HardwareConfig {
   use_remote_gpu: boolean;
   remote_gpu_url: string;
   remote_concurrency: number;
-  colab_notebook_url?: string;
   local_device: string;
   cuda_available: boolean;
   cuda_device_name: string | null;
@@ -776,7 +774,6 @@ export const useTTSStore = create<TTSState>((set, get) => {
         Boolean(record && state.text && state.text.trim() === record.text.trim());
       const matchesStudioBlocks =
         Boolean(record && currentStudioBlocks.some((b) => b.audioUrl && b.audioUrl === record.url));
-      const willLibraryBeEmpty = state.history.length <= 1;
 
       if (get().syncStatus.mode === "cloud" && get().syncStatus.mongo_connected) {
         fetch(`http://localhost:8000/api/sync/history/${id}`, {
@@ -1014,7 +1011,6 @@ export const useTTSStore = create<TTSState>((set, get) => {
       use_remote_gpu: false,
       remote_gpu_url: "",
       remote_concurrency: 2,
-      colab_notebook_url: "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO",
       local_device: "cuda",
       cuda_available: true,
       cuda_device_name: null,

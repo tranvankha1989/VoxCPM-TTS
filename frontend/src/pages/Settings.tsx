@@ -36,7 +36,6 @@ export default function Settings() {
   const [useRemoteGpu, setUseRemoteGpu] = useState(false);
   const [remoteUrl, setRemoteUrl] = useState("");
   const [concurrency, setConcurrency] = useState(2);
-  const [colabUrl, setColabUrl] = useState("https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO");
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<TestGpuResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,9 +63,6 @@ export default function Settings() {
       setUseRemoteGpu(hardwareConfig.use_remote_gpu);
       setRemoteUrl(hardwareConfig.remote_gpu_url || "");
       setConcurrency(hardwareConfig.remote_concurrency || 2);
-      if (hardwareConfig.colab_notebook_url) {
-        setColabUrl(hardwareConfig.colab_notebook_url);
-      }
     }
   }, [hardwareConfig]);
 
@@ -109,7 +105,6 @@ export default function Settings() {
         use_remote_gpu: useRemoteGpu,
         remote_gpu_url: remoteUrl.trim(),
         remote_concurrency: concurrency,
-        colab_notebook_url: colabUrl.trim(),
       });
 
       if (success) {
@@ -399,115 +394,21 @@ export default function Settings() {
                 </button>
               </div>
 
-              {/* Tùy chọn Sổ tay Google Colab (Hỗ trợ cả GitHub & Custom Google Drive) */}
-              <div className="pt-4 border-t border-white/10 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-primary" />
-                      Cấu Hình Sổ Tay Google Colab Tự Động Mở:
-                    </h4>
-                    <p className="text-[11px] text-on-surface-variant">
-                      Trình duyệt sẽ tự động mở sổ tay này mỗi khi bạn khởi động ứng dụng để bạn bấm Play (Run).
-                    </p>
-                  </div>
+              {/* Quick Link tới Colab */}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <a
+                  href="https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-primary hover:text-primary-hover underline underline-offset-4 font-medium transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Mở Google Colab Notebook (T4 16GB)
+                </a>
 
-                  {/* Nút chuyển đổi nhanh */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setColabUrl("https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS/blob/main/notebooks/OmniVoice_Colab_T4.ipynb")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
-                        colabUrl.includes("github.com/tranvankha1989")
-                          ? "bg-primary/20 border-primary text-primary"
-                          : "bg-surface-variant/30 border-white/10 text-on-surface-variant hover:text-on-surface"
-                      }`}
-                    >
-                      Dùng bản GitHub
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setColabUrl("https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
-                        colabUrl.includes("drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO")
-                          ? "bg-primary/20 border-primary text-primary"
-                          : "bg-surface-variant/30 border-white/10 text-on-surface-variant hover:text-on-surface"
-                      }`}
-                    >
-                      Dùng bản Google Drive
-                    </button>
-                  </div>
-                </div>
-
-                {/* Input link tuỳ chỉnh */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-semibold text-on-surface-variant">
-                      Đường dẫn URL sổ tay đang kích hoạt:
-                    </label>
-                    <a
-                      href={colabUrl.trim() || "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-hover underline underline-offset-4 font-semibold transition-colors"
-                    >
-                      <span>Mở ngay trên trình duyệt</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  <input
-                    type="text"
-                    value={colabUrl}
-                    onChange={(e) => setColabUrl(e.target.value)}
-                    placeholder="Dán link Google Drive hoặc GitHub vào đây..."
-                    className="w-full bg-surface-container-lowest/80 border border-white/10 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-on-surface font-mono placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all"
-                  />
-                </div>
-
-                {/* 2 Thẻ Preset rõ ràng để bấm mở ngay */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                  {/* Option 1: GitHub */}
-                  <div className="p-3 rounded-2xl bg-surface-container-lowest/60 border border-white/5 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-on-surface">
-                        <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-                        1. Sổ tay GitHub Repo
-                      </div>
-                      <p className="text-[11px] text-on-surface-variant truncate max-w-[180px]">
-                        tranvankha1989/VoxCPM-TTS
-                      </p>
-                    </div>
-                    <a
-                      href="https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-primary font-medium flex items-center gap-1 transition-all"
-                    >
-                      Mở GitHub <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-
-                  {/* Option 2: Google Drive */}
-                  <div className="p-3 rounded-2xl bg-surface-container-lowest/60 border border-white/5 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-on-surface">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                        2. Sổ tay Google Drive
-                      </div>
-                      <p className="text-[11px] text-on-surface-variant truncate max-w-[180px]">
-                        Lưu riêng trên Drive của bạn
-                      </p>
-                    </div>
-                    <a
-                      href="https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-emerald-400 font-medium flex items-center gap-1 transition-all"
-                    >
-                      Mở Drive <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
+                <span className="text-[11px] text-on-surface-variant">
+                  💡 Nhớ bấm <strong>Play (Run)</strong> trên Google Colab trước khi kiểm tra
+                </span>
               </div>
 
               {/* Banner Kết quả Test Ping */}

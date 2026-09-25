@@ -49,13 +49,13 @@ if (Test-Path $envFile) {
     }
 
     if (-not $colabUrl) {
-        $colabUrl = "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"
+        $colabUrl = "https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
     }
 
-    # Nếu USE_REMOTE_GPU=true và không trỏ đến Hugging Face -> Luôn tự động mở Google Colab
-    if ($useRemote -and ($remoteUrl -notlike "*hf.space*") -and ($remoteUrl -notlike "*huggingface*")) {
-        Write-Host "⚡ Phat hien he thong dang bat che do Cloud GPU." -ForegroundColor Yellow
-        Write-Host "👉 Tu dong mo trinh duyet Google Colab: $colabUrl" -ForegroundColor Cyan
+    # Nếu USE_REMOTE_GPU=true và REMOTE_GPU_URL có dạng ngrok-free.dev (không trỏ đến Hugging Face)
+    if ($useRemote -and ($remoteUrl -like "*ngrok-free.dev*" -or $remoteUrl -like "*ngrok-free.app*") -and ($remoteUrl -notlike "*hf.space*") -and ($remoteUrl -notlike "*huggingface*")) {
+        Write-Host "⚡ Phat hien Remote GPU dang dung Ngrok ($remoteUrl)." -ForegroundColor Yellow
+        Write-Host "👉 Tu dong mo Google Colab de ban bam khoi dong GPU..." -ForegroundColor Cyan
         Start-Process $colabUrl
     } elseif ($useRemote -and ($remoteUrl -like "*hf.space*" -or $remoteUrl -like "*huggingface*")) {
         Write-Host "⚡ Remote GPU dang tro den Hugging Face ($remoteUrl). Khoi dong Backend & Frontend binh thuong!" -ForegroundColor Green
@@ -167,8 +167,19 @@ $menuToggle.add_Click({
 
 $contextMenu.Items.Add("-") | Out-Null
 
-$menuExit = $contextMenu.Items.Add("Thoát hoàn toàn OmniVoice")
-$menuExit.add_Click({
+function Get-LauncherProcess {
+    $current = Get-CimInstance Win32_Process -Filter "ProcessId = $PID" -ErrorAction SilentlyContinue
+    while ($current -and $current.ParentProcessId) {
+        $parent = Get-CimInstance Win32_Process -Filter "ProcessId = $($current.ParentProcessId)" -ErrorAction SilentlyContinue
+        if ($parent -and ($parent.Name -match "cmd\.exe" -or $parent.CommandLine -like "*start.bat*")) {
+            return $parent
+        }
+        $current = $parent
+    }
+    return (Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*start.bat*" -or ($_.Name -eq "cmd.exe" -and $_.MainWindowTitle -like "*OmniVoice Launcher*") } | Select-Object -First 1)
+}
+
+$script:ExitApplication = {
     $notifyIcon.Visible = $false
     $notifyIcon.Dispose()
 
@@ -199,8 +210,19 @@ $menuExit.add_Click({
         [Win32Tray]::PostMessage($script:targetHWnd, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
     }
 
+    # 4. Dừng tiến trình cmd.exe cha của start.bat để Terminal đóng ngay lập tức
+    $launcher = Get-LauncherProcess
+    if ($launcher -and $launcher.ProcessId -ne $PID) {
+        Stop-Process -Id $launcher.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+
     [System.Windows.Forms.Application]::Exit()
     Stop-Process -Id $PID -Force
+}
+
+$menuExit = $contextMenu.Items.Add("Thoát hoàn toàn OmniVoice")
+$menuExit.add_Click({
+    & $script:ExitApplication
 })
 
 
@@ -217,12 +239,32 @@ $timer.add_Tick({
         try {
             $r = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/health' -TimeoutSec 1 -ErrorAction Stop
             if ($r.status -eq 'ok' -and $r.model_loaded -eq $true) {
-                Write-Host "⚡ Cloud GPU / AI Model da ket noi thanh cong! Dang mo trinh duyet Web..." -ForegroundColor Green
+                Write-Host "AI Model da san sang! Dang mo trinh duyet..." -ForegroundColor Green
                 Start-Process "http://localhost:5173"
                 $notifyIcon.Text = "OmniVoice TTS (Đang hoạt động)"
                 $script:browserOpened = $true
             }
         } catch {}
+    }
+
+    # KHI TRÌNH DUYỆT ĐÃ MỞ: Kiểm tra nếu người dùng đã đóng tất cả tab localhost
+    if ($script:browserOpened) {
+        try {
+            $sys = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/system/status' -TimeoutSec 1 -ErrorAction SilentlyContinue
+            if ($sys -and $sys.should_shutdown -eq $true) {
+                Write-Host "Phat hien tat ca tab trinh duyet da dong. Dang tu dong tat Terminal va toan bo ung dung..." -ForegroundColor Yellow
+                & $script:ExitApplication
+                return
+            }
+        } catch {
+            # Nếu backend không còn phản hồi sau khi trình duyệt đã từng mở
+            $beCon = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue
+            if (-not $beCon) {
+                Write-Host "Backend da dong. Dang tat Terminal..." -ForegroundColor Gray
+                & $script:ExitApplication
+                return
+            }
+        }
     }
 
     if ($script:targetHWnd -eq [IntPtr]::Zero) {

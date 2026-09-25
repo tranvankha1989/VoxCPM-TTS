@@ -1,61 +1,121 @@
-import os
-from pathlib import Path
-from fastapi import APIRouter, HTTPException
+import time
+import asyncio
+from typing import Dict
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse
 
-from app.core.config import OUTPUTS_DIR
+from app.core.config import OUTPUTS_DIR, logger
 from app.schemas.common import HealthResponse
 
 router = APIRouter(tags=["System"])
 
-
-import time
-import asyncio
-from app.core.config import logger
-
-_last_heartbeat_time: float = 0.0
+# Quản lý trạng thái tab trình duyệt đang mở
+_active_tabs: Dict[str, float] = {}  # tab_id -> last_seen timestamp
 _has_received_heartbeat: bool = False
-_HEARTBEAT_TIMEOUT: float = 8.0 # Cho phep toi da 8 giay khong co heartbeat truoc khi tat terminal
+_no_tab_since: float = 0.0
+_should_shutdown: bool = False
 
 
-@router.post("/api/system/heartbeat", summary="Heartbeat tu tab trinh duyet cua nguoi dung")
-async def client_heartbeat():
-    """Ghi nhan tab trinh duyet localhost dang mo va hoat dong."""
-    global _last_heartbeat_time, _has_received_heartbeat
-    _last_heartbeat_time = time.time()
-    _has_received_heartbeat = True
-    return {"status": "alive", "timestamp": _last_heartbeat_time}
+@router.post("/api/system/heartbeat", summary="Heartbeat từ tab trình duyệt")
+@router.post("/api/system/tab-closed", summary="Thông báo tab trình duyệt vừa đóng")
+async def receive_heartbeat(request: Request):
+    """
+    Ghi nhận tín hiệu heartbeat hoặc đóng tab từ giao diện frontend.
+    Nếu toàn bộ tab localhost bị đóng quá 5 giây, hệ thống sẽ kích hoạt tự đóng.
+    """
+    global _has_received_heartbeat, _no_tab_since
+    tab_id = "default"
+    action = "heartbeat"
+
+    try:
+        data = await request.json()
+        tab_id = str(data.get("tab_id", "default"))
+        action = str(data.get("action", "heartbeat"))
+    except Exception:
+        pass
+
+    now = time.time()
+    if action == "close" or "tab-closed" in request.url.path:
+        _active_tabs.pop(tab_id, None)
+        if len(_active_tabs) == 0 and _no_tab_since == 0.0:
+            _no_tab_since = now
+    else:
+        _has_received_heartbeat = True
+        _active_tabs[tab_id] = now
+        _no_tab_since = 0.0
+
+    return {
+        "status": "ok",
+        "active_tabs": len(_active_tabs),
+        "has_heartbeat": _has_received_heartbeat,
+    }
 
 
-@router.post("/api/system/tab-closed", summary="Thong bao tab trinh duyet vua dong")
-async def client_tab_closed():
-    """Nhan tin hieu beacon khi tab dong."""
-    return {"status": "acknowledged"}
+@router.get("/api/system/status", summary="Kiểm tra trạng thái hệ thống và tab trình duyệt")
+async def get_system_status():
+    """Endpoint cho Tray Manager hoặc script giám sát hỏi xem có nên tắt hệ thống không."""
+    global _has_received_heartbeat, _no_tab_since, _should_shutdown
+    now = time.time()
+
+    # Dọn dẹp tab đã quá hạn 4.5 giây không gửi heartbeat
+    expired = [tid for tid, t in _active_tabs.items() if now - t > 4.5]
+    for tid in expired:
+        _active_tabs.pop(tid, None)
+
+    if _has_received_heartbeat:
+        if len(_active_tabs) == 0:
+            if _no_tab_since == 0.0:
+                _no_tab_since = now
+            elif now - _no_tab_since >= 5.0:
+                _should_shutdown = True
+        else:
+            _no_tab_since = 0.0
+
+    return {
+        "status": "ok",
+        "has_received_heartbeat": _has_received_heartbeat,
+        "active_tabs_count": len(_active_tabs),
+        "should_shutdown": _should_shutdown,
+        "no_tab_seconds": (now - _no_tab_since) if _no_tab_since > 0.0 else 0.0,
+    }
 
 
 async def monitor_browser_lifetime():
-    """Vong lap giam sat: Tu dong tat server va thoat terminal khi nguoi dung dong het cac tab localhost."""
-    global _last_heartbeat_time, _has_received_heartbeat
-    logger.info("🛡️ Giam sat tab trinh duyet da kich hoat: Se tu dong thoat terminal khi tat het tab localhost.")
+    """
+    Vòng lặp chạy ngầm trong server:
+    Khi người dùng đã mở trình duyệt và sau đó đóng toàn bộ các tab localhost quá 5 giây,
+    tiến trình backend sẽ tự động dừng và đóng terminal.
+    """
+    global _has_received_heartbeat, _no_tab_since, _should_shutdown
+    logger.info("🛡️ Giám sát tab trình duyệt đã kích hoạt: Tự động đóng Terminal khi tắt trình duyệt.")
     while True:
-        await asyncio.sleep(2.0)
+        await asyncio.sleep(1.0)
         now = time.time()
 
-        if not _has_received_heartbeat:
-            continue
+        # Dọn dẹp các tab mất kết nối
+        expired = [tid for tid, t in _active_tabs.items() if now - t > 4.5]
+        for tid in expired:
+            _active_tabs.pop(tid, None)
 
-        if now - _last_heartbeat_time > _HEARTBEAT_TIMEOUT:
-            logger.info("🛑 Phat hien nguoi dung da dong toan bo tab localhost.")
-            logger.info("👋 Dang tu dong dong he thong va thoat terminal...")
-            await asyncio.sleep(0.5)
-            import os
-            import signal
-            try:
-                os.kill(os.getpid(), signal.SIGINT)
-            except Exception:
-                pass
-            await asyncio.sleep(0.5)
-            os._exit(0)
+        if _has_received_heartbeat:
+            if len(_active_tabs) == 0:
+                if _no_tab_since == 0.0:
+                    _no_tab_since = now
+                elif now - _no_tab_since >= 5.0:
+                    _should_shutdown = True
+                    logger.info("🛑 Phát hiện người dùng đã đóng toàn bộ tab trình duyệt.")
+                    logger.info("👋 Đang tự động đóng hệ thống và tắt terminal...")
+                    await asyncio.sleep(0.5)
+                    import signal
+                    try:
+                        os.kill(os.getpid(), signal.SIGINT)
+                    except Exception:
+                        pass
+                    await asyncio.sleep(0.5)
+                    os._exit(0)
+            else:
+                _no_tab_since = 0.0
+
 
 
 @router.get(
@@ -69,12 +129,13 @@ async def monitor_browser_lifetime():
     summary="Kiểm tra trạng thái máy chủ và mô hình (hỗ trợ Tray Manager)",
 )
 async def health_check():
-    """Kiểm tra server đang hoạt động và OmniVoice đã sẵn sàng (local Model nạp xong HOẶC Remote GPU online)."""
+    """Kiểm tra server đang hoạt động và OmniVoice đã sẵn sàng (local hoặc Remote GPU)."""
     import model_handler
-    is_ready = model_handler.is_system_ai_ready()
+    is_remote = getattr(model_handler, "USE_REMOTE_GPU", False)
+    is_loaded = getattr(model_handler, "_model", None) is not None or is_remote
     return HealthResponse(
         status="ok",
-        model_loaded=is_ready,
+        model_loaded=is_loaded,
     )
 
 
