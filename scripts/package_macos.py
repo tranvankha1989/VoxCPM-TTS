@@ -45,6 +45,16 @@ def package_macos():
                     full_p = Path(root) / file
                     rel_p = full_p.relative_to(root_dir)
                     add_file_with_perms(zipf, full_p, str(rel_p).replace('\\', '/'), is_exec=False)
+
+        # 4. Thu muc notebooks va HDSD
+        for doc_dir_name in ["notebooks", "HDSD"]:
+            doc_dir = root_dir / doc_dir_name
+            if doc_dir.exists():
+                for root, _, files in os.walk(doc_dir):
+                    for file in files:
+                        full_p = Path(root) / file
+                        rel_p = full_p.relative_to(root_dir)
+                        add_file_with_perms(zipf, full_p, str(rel_p).replace('\\', '/'), is_exec=False)
                     
         # 4. Thu muc backend (bo venv, outputs, __pycache__, scratch)
         be_dir = root_dir / "backend"

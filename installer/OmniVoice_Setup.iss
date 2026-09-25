@@ -52,8 +52,10 @@ Source: "OmniVoice_Start.bat"; DestDir: "{app}\installer"; Flags: ignoreversion
 Source: "setup_environment.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "setup_environment.bat"; DestDir: "{app}\installer"; Flags: ignoreversion
 
-; 5. File tài liệu
+; 5. File tài liệu và Notebooks
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\notebooks\*"; DestDir: "{app}\notebooks"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\HDSD\*"; DestDir: "{app}\HDSD"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\installer\{#MyAppExeName}"; IconFilename: "{app}\assets\app.ico"

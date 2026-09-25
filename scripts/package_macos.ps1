@@ -23,6 +23,14 @@ if (Test-Path (Join-Path $RootDir "assets")) {
     Copy-Item (Join-Path $RootDir "assets") $Staging -Recurse
 }
 
+if (Test-Path (Join-Path $RootDir "notebooks")) {
+    Copy-Item (Join-Path $RootDir "notebooks") $Staging -Recurse
+}
+
+if (Test-Path (Join-Path $RootDir "HDSD")) {
+    Copy-Item (Join-Path $RootDir "HDSD") $Staging -Recurse
+}
+
 New-Item -ItemType Directory -Path (Join-Path $Staging "frontend") -Force | Out-Null
 if (Test-Path (Join-Path $RootDir "frontend\dist")) {
     Copy-Item (Join-Path $RootDir "frontend\dist") (Join-Path $Staging "frontend\dist") -Recurse
