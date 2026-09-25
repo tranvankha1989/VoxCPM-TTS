@@ -397,7 +397,7 @@ export default function Settings() {
               {/* Quick Link tới Colab */}
               <div className="flex items-center justify-between text-xs pt-1">
                 <a
-                  href="https://colab.research.google.com/github/FrozenBiu/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
+                  href="https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-primary hover:text-primary-hover underline underline-offset-4 font-medium transition-colors"
