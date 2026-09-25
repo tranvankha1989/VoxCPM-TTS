@@ -6,7 +6,6 @@ cd /d "%~dp0\.."
 set "APP_ROOT=%cd%"
 set "BACKEND_DIR=%APP_ROOT%\backend"
 set "PYTHON_EXE=%BACKEND_DIR%\venv\Scripts\python.exe"
-set "PYTHONW_EXE=%BACKEND_DIR%\venv\Scripts\pythonw.exe"
 
 :: Kiem tra neu chua cai dat moi truong
 if not exist "%PYTHON_EXE%" (
@@ -15,10 +14,10 @@ if not exist "%PYTHON_EXE%" (
 )
 
 :: Kiem tra xem uvicorn dang chay chua
-netstat -ano | findstr ":8000" | findstr "LISTENING" >nul 2>nul
+netstat -ano | findstr ":8000" | findstr "LISTENING" >nul 2>&1
 if !errorlevel! equ 0 (
     echo [INFO] Server OmniVoice da san sang. Dang mo trinh duyet...
-    findstr /i /c:"USE_REMOTE_GPU=true" "%BACKEND_DIR%\.env" >nul 2>nul
+    findstr /i /c:"USE_REMOTE_GPU=true" "%BACKEND_DIR%\.env" >nul 2>&1
     if !errorlevel! equ 0 (
         set "COLAB_LINK="
         for /f "tokens=1,* delims==" %%A in ('findstr /i /c:"COLAB_NOTEBOOK_URL" "%BACKEND_DIR%\.env"') do set "COLAB_LINK=%%B"
@@ -29,7 +28,7 @@ if !errorlevel! equ 0 (
 )
 
 echo ========================================================
-echo        Khoi dong OmniVoice TTS Studio (24kHz)
+echo        Khoi dong OmniVoice TTS Studio
 echo ========================================================
 echo.
 echo   - Backend AI: http://localhost:8000
@@ -39,7 +38,7 @@ echo Nhan Ctrl+C de dung he thong.
 echo ========================================================
 
 :: Kiem tra va tu dong mo Google Colab neu dang bat Cloud GPU
-findstr /i /c:"USE_REMOTE_GPU=true" "%BACKEND_DIR%\.env" >nul 2>nul
+findstr /i /c:"USE_REMOTE_GPU=true" "%BACKEND_DIR%\.env" >nul 2>&1
 if !errorlevel! equ 0 (
     echo [INFO] Dang bat che do Cloud GPU. Dang tu dong mo Google Colab tren trinh duyet...
     set "COLAB_LINK="
