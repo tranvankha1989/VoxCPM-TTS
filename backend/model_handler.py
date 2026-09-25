@@ -160,6 +160,10 @@ def load_model() -> None:
         if CUDNN_BENCHMARK:
             torch.backends.cudnn.benchmark = True
             logger.info("⚡ Đã bật torch.backends.cudnn.benchmark để tối ưu tốc độ tính toán ma trận.")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        device_map = "mps"
+        dtype_val = torch.float32
+        logger.info("🍎 Đã kích hoạt tăng tốc phần cứng Apple Silicon Metal (MPS).")
     else:
         device_map = "cpu"
         dtype_val = torch.float32

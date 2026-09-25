@@ -7,7 +7,7 @@
 #define MyAppVersion "2.2.0"
 #define MyAppPublisher "Tran Van Kha"
 #define MyAppURL "https://github.com/tranvankha1989/self-tts"
-#define MyAppExeName "OmniVoice_Launcher.vbs"
+#define MyAppExeName "OmniVoice_Start.bat"
 
 [Setup]
 AppId={{C7829910-E577-492B-864B-8E407BFDD89B}
@@ -37,8 +37,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-; 1. Backend mã nguồn và môi trường Python nhúng
-Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__,*.pyc,outputs\*,venv\pip-cache\*"
+; 1. Backend mã nguồn (không đóng gói venv nặng 3GB, máy sẽ tự cài qua mạng)
+Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__,*.pyc,outputs\*,venv\*"
 
 ; 2. Frontend phân phối tĩnh (đã build sẵn)
 Source: "..\frontend\dist\*"; DestDir: "{app}\frontend\dist"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -46,8 +46,11 @@ Source: "..\frontend\dist\*"; DestDir: "{app}\frontend\dist"; Flags: ignoreversi
 ; 3. Icons và tài nguyên
 Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; 4. Trình khởi chạy ẩn không hiện console
-Source: "OmniVoice_Launcher.vbs"; DestDir: "{app}\installer"; Flags: ignoreversion
+; 4. Trình khởi chạy và cài đặt môi trường
+Source: "OmniVoice_Start.bat"; DestDir: "{app}"; Flags: ignoreversion
+Source: "OmniVoice_Start.bat"; DestDir: "{app}\installer"; Flags: ignoreversion
+Source: "setup_environment.bat"; DestDir: "{app}"; Flags: ignoreversion
+Source: "setup_environment.bat"; DestDir: "{app}\installer"; Flags: ignoreversion
 
 ; 5. File tài liệu
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
@@ -57,4 +60,4 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\installer\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\installer\{#MyAppExeName}"; IconFilename: "{app}\assets\app.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\installer\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: postinstall shellexec skipifsilent
+Filename: "{app}\installer\setup_environment.bat"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: postinstall skipifsilent nowait

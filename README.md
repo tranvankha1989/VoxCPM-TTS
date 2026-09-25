@@ -101,7 +101,10 @@ Nếu máy tính của bạn **không có card đồ hoạ rời (VGA)** hoặc 
    ```
 
 ### ☕ Tùy chọn 2: Google Colab GPU T4 (NVIDIA Tesla T4 16GB)
-Mở file [`notebooks/OmniVoice_Colab_T4.ipynb`](file:///d:/Coding/VSCode/self-tts/notebooks/OmniVoice_Colab_T4.ipynb) trên [Google Colab](https://colab.research.google.com/) và vào `Runtime` ➔ `Change runtime type` ➔ Chọn **T4 GPU**.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb)
+
+Mở trực tiếp sổ tay: [OmniVoice_Colab_T4.ipynb trên Google Colab](https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb) và vào `Runtime` ➔ `Change runtime type` ➔ Chọn **T4 GPU**.
 
 #### 🌟 Cách 1: Kết nối cố định vĩnh viễn với Ngrok Static Domain (Khuyên dùng - Điền 1 lần dùng mãi mãi)
 1. Đăng ký tài khoản miễn phí tại [dashboard.ngrok.com](https://dashboard.ngrok.com/) (đăng nhập bằng Google trong 10 giây).
