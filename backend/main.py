@@ -21,45 +21,12 @@ from app.routers import api_router
 from model_handler import load_model
 
 
-import os
-import threading
-import time
-import webbrowser
-
-
-def _open_browser_tabs():
-    """Tự động mở tab trình duyệt Web App và Google Colab GPU khi khởi động server."""
-    time.sleep(1.2)
-    # 1. Mở Web App local
-    try:
-        webbrowser.open("http://localhost:8000")
-    except Exception as e:
-        logger.warning(f"Không thể mở trình duyệt Web App: {e}")
-
-    # 2. Nếu đang bật USE_REMOTE_GPU thì tự động mở Google Colab T4
-    use_remote = os.getenv("USE_REMOTE_GPU", "false").lower() == "true"
-    remote_url = os.getenv("REMOTE_GPU_URL", "").lower()
-    colab_url = os.getenv("COLAB_NOTEBOOK_URL", "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO").strip()
-
-    if use_remote and ("hf.space" not in remote_url and "huggingface" not in remote_url):
-        time.sleep(1.0)
-        logger.info(f"⚡ Phát hiện Cloud GPU đang bật — Tự động mở Google Colab trên trình duyệt: {colab_url}")
-        try:
-            webbrowser.open(colab_url)
-        except Exception as e:
-            logger.warning(f"Không thể mở Google Colab: {e}")
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load mô hình OmniVoice và kết nối cơ sở dữ liệu nếu có cấu hình."""
     logger.info("🚀 Server đang khởi động — nạp mô hình OmniVoice (24kHz) …")
     load_model()
     await connect_db()
-
-    # Tự động mở trình duyệt Web App & Google Colab GPU trong luồng nền
-    threading.Thread(target=_open_browser_tabs, daemon=True).start()
-
     yield
     await close_db()
     logger.info("🛑 Server đang tắt.")
