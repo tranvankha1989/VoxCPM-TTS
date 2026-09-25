@@ -258,6 +258,8 @@ interface TTSState {
     remote_concurrency?: number;
   }) => Promise<boolean>;
   testRemoteGpuConnection: (url: string) => Promise<TestGpuResult>;
+  openEnvFile: () => Promise<{ ok: boolean; message?: string }>;
+  reloadBackend: () => Promise<{ ok: boolean; message?: string }>;
 }
 
 export interface HardwareConfig {
@@ -1062,6 +1064,34 @@ export const useTTSStore = create<TTSState>((set, get) => {
         return await res.json();
       } catch (err: any) {
         return { ok: false, error: err.message || "Lỗi kết nối mạng" };
+      }
+    },
+    openEnvFile: async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/settings/open-env", {
+          method: "POST",
+        });
+        const data = await res.json();
+        return { ok: res.ok, message: data.message || data.detail };
+      } catch (err: any) {
+        return { ok: false, message: err.message || "Không thể kết nối máy chủ Backend" };
+      }
+    },
+    reloadBackend: async () => {
+      try {
+        set({ isLoadingHardware: true });
+        const res = await fetch("http://localhost:8000/api/settings/reload-backend", {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (res.ok && data.hardware) {
+          set({ hardwareConfig: data.hardware });
+        }
+        return { ok: res.ok, message: data.message || data.detail };
+      } catch (err: any) {
+        return { ok: false, message: err.message || "Không thể kết nối máy chủ Backend" };
+      } finally {
+        set({ isLoadingHardware: false });
       }
     },
   }; // end return

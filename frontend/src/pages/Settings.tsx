@@ -16,8 +16,10 @@ import {
   RefreshCw,
   BookOpen,
   Sliders,
+  FileCode,
 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { useTTSStore, type TestGpuResult } from "@/store/useTTSStore";
 
 export default function Settings() {
@@ -26,6 +28,8 @@ export default function Settings() {
     fetchHardwareSettings,
     updateHardwareSettings,
     testRemoteGpuConnection,
+    openEnvFile,
+    reloadBackend,
     isLoadingHardware,
     syncStatus,
     checkStorageStatus,
@@ -39,6 +43,43 @@ export default function Settings() {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<TestGpuResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOpeningEnv, setIsOpeningEnv] = useState(false);
+  const [isReloadingBackend, setIsReloadingBackend] = useState(false);
+
+  const handleOpenEnv = async () => {
+    setIsOpeningEnv(true);
+    try {
+      const res = await openEnvFile();
+      if (res.ok) {
+        toast.success(res.message || "Đã mở file .env bằng Notepad.");
+        toast.info("Sau khi chỉnh sửa xong và nhấn Ctrl+S lưu lại, hãy bấm nút 'Làm mới Backend' để áp dụng!");
+      } else {
+        toast.error(res.message || "Không thể mở file .env.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi gọi mở file .env.");
+    } finally {
+      setIsOpeningEnv(false);
+    }
+  };
+
+  const handleReloadBackend = async () => {
+    setIsReloadingBackend(true);
+    try {
+      const res = await reloadBackend();
+      if (res.ok) {
+        toast.success(res.message || "Đã làm mới Backend và cập nhật cấu hình .env thành công!");
+        await fetchHardwareSettings();
+        await checkStorageStatus();
+      } else {
+        toast.error(res.message || "Làm mới Backend thất bại.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi làm mới Backend.");
+    } finally {
+      setIsReloadingBackend(false);
+    }
+  };
 
   // Default studio model params stored in localStorage
   const [defaultCfg, setDefaultCfg] = useState(() => {
@@ -476,6 +517,47 @@ export default function Settings() {
               </div>
             </div>
           )}
+
+          {/* Card Quản lý trực tiếp file .env & Làm mới Backend */}
+          <div className="p-6 rounded-3xl bg-surface-variant/20 border border-white/10 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                  <FileCode className="w-4 h-4 text-primary" />
+                  Chỉnh Sửa File Cấu Hình Trực Tiếp (.env)
+                </h3>
+                <p className="text-xs text-on-surface-variant mt-1">
+                  Mở file <code className="font-mono text-primary px-1.5 py-0.5 rounded bg-white/5 border border-white/10">backend/.env</code> bằng ứng dụng Notepad để tùy biến cấu hình chi tiết (GPU, R2, MongoDB, Port...).
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleOpenEnv}
+                  disabled={isOpeningEnv}
+                  className="px-4 py-2.5 rounded-2xl bg-surface-variant hover:bg-surface-variant/80 border border-white/10 hover:border-white/20 text-on-surface text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-[1.02] disabled:opacity-50"
+                >
+                  {isOpeningEnv ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  ) : (
+                    <ExternalLink className="w-4 h-4 text-primary" />
+                  )}
+                  Mở file .env (Notepad)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleReloadBackend}
+                  disabled={isReloadingBackend || isLoadingHardware}
+                  className="px-4 py-2.5 rounded-2xl bg-primary/20 hover:bg-primary/30 border border-primary/40 text-primary text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw className={cn("w-4 h-4", (isReloadingBackend || isLoadingHardware) && "animate-spin")} />
+                  Làm mới Backend
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Action Bar Lưu Thay Đổi */}
           <div className="flex items-center justify-between pt-4 border-t border-white/10">

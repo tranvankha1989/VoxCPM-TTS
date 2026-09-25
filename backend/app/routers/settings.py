@@ -2,6 +2,8 @@ import os
 import re
 import time
 import httpx
+import sys
+import subprocess
 from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, HTTPException
@@ -198,3 +200,71 @@ async def test_remote_gpu(req: TestRemoteGpuRequest):
             ok=False,
             error=f"Lỗi kết nối: {str(e)}",
         )
+
+
+@router.post("/open-env", summary="Mở file .env bằng Notepad để chỉnh sửa")
+async def open_env_file():
+    """Mở file backend/.env trên máy tính người dùng bằng Notepad hoặc text editor mặc định."""
+    env_path = ENV_FILE
+    if not env_path.exists():
+        example_path = BASE_DIR / ".env.example"
+        if example_path.exists():
+            env_path.write_text(example_path.read_text(encoding="utf-8"), encoding="utf-8")
+        else:
+            env_path.write_text("# Cấu hình OmniVoice TTS\n", encoding="utf-8")
+
+    try:
+        if sys.platform == "win32":
+            subprocess.Popen(["notepad.exe", str(env_path)])
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", str(env_path)])
+        else:
+            subprocess.Popen(["xdg-open", str(env_path)])
+        logger.info(f"📝 Đã mở file {env_path} bằng Notepad cho người dùng.")
+        return {
+            "status": "ok",
+            "message": "Đã mở file .env bằng Notepad. Sau khi chỉnh sửa, hãy nhớ nhấn Lưu (Ctrl+S) rồi bấm nút 'Làm mới Backend'.",
+        }
+    except Exception as e:
+        logger.error(f"Lỗi khi mở Notepad: {e}")
+        raise HTTPException(status_code=500, detail=f"Không thể mở file bằng Notepad: {e}")
+
+
+@router.post("/reload-backend", summary="Làm mới Backend và nạp lại cấu hình .env")
+async def reload_backend():
+    """
+    Nạp lại toàn bộ file backend/.env vào môi trường hiện tại:
+    - Cập nhật cấu hình GPU (Local vs Remote GPU)
+    - Cập nhật cấu hình Cloud Sync (MongoDB, Cloudflare R2)
+    - Nạp lại mô hình nếu chuyển đổi chế độ
+    """
+    load_dotenv(ENV_FILE, override=True)
+
+    # Nạp lại cấu hình model_handler
+    model_handler.is_remote_gpu_enabled()
+    model_handler.get_remote_gpu_url()
+
+    # Nếu chuyển sang local và chưa nạp mô hình
+    if not model_handler.is_remote_gpu_enabled() and model_handler._model is None:
+        try:
+            model_handler.load_model()
+        except Exception as e:
+            logger.warning(f"Chưa thể nạp local model ngay: {e}")
+
+    # Nạp lại kết nối database nếu MONGODB_URI thay đổi
+    from app.core.database import connect_db
+    try:
+        await connect_db()
+    except Exception as e:
+        logger.warning(f"Lỗi kết nối lại DB: {e}")
+
+    # Lấy lại trạng thái mới nhất
+    hw = await get_hardware_settings()
+
+    logger.info("🔄 Đã làm mới Backend và nạp lại toàn bộ cấu hình .env thành công.")
+    return {
+        "status": "ok",
+        "message": "Đã làm mới Backend và cập nhật file .env thành công!",
+        "hardware": hw,
+    }
+

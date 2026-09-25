@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { path: "/cloning-voice", label: "Tạo giọng mới", icon: "record_voice_over" },
   { path: "/autocaption", label: "Auto Caption", icon: "subtitles" },
   { path: "/projects", label: "Dự án", icon: "folder_shared" },
-  { path: "/settings", label: "Cài đặt & GPU", icon: "settings" },
 ];
 
 export function MainLayout() {
@@ -166,6 +165,45 @@ export function MainLayout() {
 
         {/* Sync & Hardware Status Footer */}
         <div className="mt-auto pt-3 border-t border-white/10 w-full space-y-2">
+          {/* Nút Cài đặt & GPU được dời xuống ngay trên HardwareBadge */}
+          <Link
+            to="/settings"
+            className={cn(
+              "flex items-center h-11 rounded-xl transition-all duration-200 font-label-caps text-label-caps group relative w-full overflow-hidden",
+              location.pathname === "/settings"
+                ? "text-primary bg-primary/15 border border-primary/30 font-semibold shadow-sm"
+                : "text-on-surface-variant hover:bg-surface-variant/40 hover:text-on-surface border border-transparent",
+            )}
+          >
+            <div className="w-11 h-11 flex items-center justify-center shrink-0">
+              <span
+                className={cn(
+                  "material-symbols-outlined transition-transform duration-200 group-hover:scale-110 shrink-0 text-2xl",
+                  location.pathname === "/settings"
+                    ? "text-primary"
+                    : "text-on-surface-variant group-hover:text-on-surface",
+                )}
+              >
+                settings
+              </span>
+            </div>
+            <span
+              className={cn(
+                "whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ml-1",
+                isCollapsed
+                  ? "max-w-0 opacity-0 -translate-x-3 pointer-events-none"
+                  : "max-w-[150px] opacity-100 translate-x-0",
+              )}
+            >
+              Cài đặt & GPU
+            </span>
+            {isCollapsed && (
+              <div className="absolute left-full ml-3 px-3 py-1.5 bg-black/95 text-white text-xs font-medium rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50">
+                Cài đặt & GPU
+              </div>
+            )}
+          </Link>
+
           {!isCollapsed && (
             <div className="px-1 flex justify-center">
               <HardwareBadge />
@@ -253,6 +291,21 @@ export function MainLayout() {
             <span className="material-symbols-outlined mb-1">subtitles</span>
             <span className="text-[10px] font-label-caps">Auto Caption</span>
             {location.pathname === "/autocaption" && (
+              <div className="absolute top-0 w-8 h-1 bg-primary rounded-b-full"></div>
+            )}
+          </Link>
+          <Link
+            to="/settings"
+            className={cn(
+              "flex flex-col items-center justify-center w-full h-full relative transition-colors",
+              location.pathname === "/settings"
+                ? "text-primary"
+                : "text-on-surface-variant hover:text-on-surface",
+            )}
+          >
+            <span className="material-symbols-outlined mb-1">settings</span>
+            <span className="text-[10px] font-label-caps">Cài đặt</span>
+            {location.pathname === "/settings" && (
               <div className="absolute top-0 w-8 h-1 bg-primary rounded-b-full"></div>
             )}
           </Link>
