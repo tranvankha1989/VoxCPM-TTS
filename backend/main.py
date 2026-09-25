@@ -21,13 +21,19 @@ from app.routers import api_router
 from model_handler import load_model
 
 
+import asyncio
+from app.routers.health import monitor_browser_lifetime
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load mô hình OmniVoice và kết nối cơ sở dữ liệu nếu có cấu hình."""
     logger.info("🚀 Server đang khởi động — nạp mô hình OmniVoice (24kHz) …")
     load_model()
     await connect_db()
+    monitor_task = asyncio.create_task(monitor_browser_lifetime())
     yield
+    monitor_task.cancel()
     await close_db()
     logger.info("🛑 Server đang tắt.")
 

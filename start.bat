@@ -41,7 +41,7 @@ if not exist "%~dp0backend\venv\Scripts\python.exe" (
 )
 
 cd /d "%~dp0frontend"
-call pnpm exec concurrently --kill-others-on-fail --names "BACKEND,FRONTEND,TRAY" --prefix-colors "blue,magenta,cyan" "cd /d \"%~dp0backend\" && \"%~dp0backend\venv\Scripts\python.exe\" -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload" "call pnpm dev" "powershell -NoProfile -ExecutionPolicy Bypass -File \"%~dp0scripts\tray_manager.ps1\""
+call pnpm exec concurrently --kill-others --names "BACKEND,FRONTEND,TRAY" --prefix-colors "blue,magenta,cyan" "cd /d \"%~dp0backend\" && \"%~dp0backend\venv\Scripts\python.exe\" -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload" "call pnpm dev" "powershell -NoProfile -ExecutionPolicy Bypass -File \"%~dp0scripts\tray_manager.ps1\""
 
 if %errorlevel% neq 0 pause
 

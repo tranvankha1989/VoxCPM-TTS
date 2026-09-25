@@ -9,6 +9,55 @@ from app.schemas.common import HealthResponse
 router = APIRouter(tags=["System"])
 
 
+import time
+import asyncio
+from app.core.config import logger
+
+_last_heartbeat_time: float = 0.0
+_has_received_heartbeat: bool = False
+_HEARTBEAT_TIMEOUT: float = 8.0 # Cho phep toi da 8 giay khong co heartbeat truoc khi tat terminal
+
+
+@router.post("/api/system/heartbeat", summary="Heartbeat tu tab trinh duyet cua nguoi dung")
+async def client_heartbeat():
+    """Ghi nhan tab trinh duyet localhost dang mo va hoat dong."""
+    global _last_heartbeat_time, _has_received_heartbeat
+    _last_heartbeat_time = time.time()
+    _has_received_heartbeat = True
+    return {"status": "alive", "timestamp": _last_heartbeat_time}
+
+
+@router.post("/api/system/tab-closed", summary="Thong bao tab trinh duyet vua dong")
+async def client_tab_closed():
+    """Nhan tin hieu beacon khi tab dong."""
+    return {"status": "acknowledged"}
+
+
+async def monitor_browser_lifetime():
+    """Vong lap giam sat: Tu dong tat server va thoat terminal khi nguoi dung dong het cac tab localhost."""
+    global _last_heartbeat_time, _has_received_heartbeat
+    logger.info("🛡️ Giam sat tab trinh duyet da kich hoat: Se tu dong thoat terminal khi tat het tab localhost.")
+    while True:
+        await asyncio.sleep(2.0)
+        now = time.time()
+
+        if not _has_received_heartbeat:
+            continue
+
+        if now - _last_heartbeat_time > _HEARTBEAT_TIMEOUT:
+            logger.info("🛑 Phat hien nguoi dung da dong toan bo tab localhost.")
+            logger.info("👋 Dang tu dong dong he thong va thoat terminal...")
+            await asyncio.sleep(0.5)
+            import os
+            import signal
+            try:
+                os.kill(os.getpid(), signal.SIGINT)
+            except Exception:
+                pass
+            await asyncio.sleep(0.5)
+            os._exit(0)
+
+
 @router.get(
     "/api/health",
     response_model=HealthResponse,
