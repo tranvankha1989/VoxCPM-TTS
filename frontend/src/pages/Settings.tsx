@@ -416,7 +416,7 @@ export default function Settings() {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setColabUrl("https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb")}
+                      onClick={() => setColabUrl("https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb")}
                       className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
                         colabUrl.includes("github.com/tranvankha1989")
                           ? "bg-primary/20 border-primary text-primary"
@@ -474,11 +474,11 @@ export default function Settings() {
                         1. Sổ tay GitHub Repo
                       </div>
                       <p className="text-[11px] text-on-surface-variant truncate max-w-[180px]">
-                        tranvankha1989/self-tts
+                        tranvankha1989/VoxCPM-TTS-tts
                       </p>
                     </div>
                     <a
-                      href="https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
+                      href="https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
                       target="_blank"
                       rel="noreferrer"
                       className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-primary font-medium flex items-center gap-1 transition-all"

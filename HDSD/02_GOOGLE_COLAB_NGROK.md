@@ -54,8 +54,8 @@ Mỗi ngày khi muốn làm việc với app, bạn chỉ cần thực hiện 4 
 
 ### Bước 3.1: Mở Google Colab và tải sổ tay lên
 
-1. Mở trực tiếp bằng liên kết: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb)
-   * Hoặc truy cập link trực tiếp: [https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb](https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb)
+1. Mở trực tiếp bằng liên kết: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb)
+   * Hoặc truy cập link trực tiếp: [https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb](https://colab.research.google.com/github/tranvankha1989/VoxCPM-TTS-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb)
 2. Nếu mở thủ công: Truy cập [Google Colab](https://colab.research.google.com/) ➔ Chọn tab **Upload (Tải lên)** ➔ Tải file [OmniVoice_Colab_T4.ipynb](file:///d:/Program%20File/AI/self-tts/notebooks/OmniVoice_Colab_T4.ipynb) trong thư mục `notebooks/` của dự án.
 
 ### Bước 3.2: Bật GPU T4
