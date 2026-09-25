@@ -20,6 +20,7 @@ class HardwareSettingsResponse(BaseModel):
     use_remote_gpu: bool
     remote_gpu_url: str
     remote_concurrency: int = 2
+    colab_notebook_url: Optional[str] = "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"
     local_device: str
     cuda_available: bool
     cuda_device_name: Optional[str] = None
@@ -30,6 +31,7 @@ class UpdateHardwareSettingsRequest(BaseModel):
     use_remote_gpu: bool
     remote_gpu_url: str
     remote_concurrency: Optional[int] = 2
+    colab_notebook_url: Optional[str] = None
 
 
 class TestRemoteGpuRequest(BaseModel):
@@ -75,6 +77,7 @@ async def get_hardware_settings():
     use_remote = model_handler.is_remote_gpu_enabled()
     remote_url = model_handler.get_remote_gpu_url()
     remote_concurrency = int(os.getenv("REMOTE_CONCURRENCY", "2"))
+    colab_url = os.getenv("COLAB_NOTEBOOK_URL", "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO").strip()
 
     # pyrefly: ignore [missing-import]
     import torch
@@ -87,6 +90,7 @@ async def get_hardware_settings():
         use_remote_gpu=use_remote,
         remote_gpu_url=remote_url,
         remote_concurrency=remote_concurrency,
+        colab_notebook_url=colab_url,
         local_device=local_dev,
         cuda_available=cuda_ok,
         cuda_device_name=dev_name,
@@ -102,6 +106,8 @@ async def update_hardware_settings(req: UpdateHardwareSettingsRequest):
         "REMOTE_GPU_URL": url_cleaned,
         "REMOTE_CONCURRENCY": str(req.remote_concurrency or 2),
     }
+    if req.colab_notebook_url is not None:
+        updates["COLAB_NOTEBOOK_URL"] = req.colab_notebook_url.strip()
 
     try:
         _update_env_file(updates)

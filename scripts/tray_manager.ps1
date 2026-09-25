@@ -49,7 +49,7 @@ if (Test-Path $envFile) {
     }
 
     if (-not $colabUrl) {
-        $colabUrl = "https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
+        $colabUrl = "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"
     }
 
     # Nếu USE_REMOTE_GPU=true và REMOTE_GPU_URL có dạng ngrok-free.dev (không trỏ đến Hugging Face)

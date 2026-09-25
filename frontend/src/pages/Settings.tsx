@@ -36,6 +36,7 @@ export default function Settings() {
   const [useRemoteGpu, setUseRemoteGpu] = useState(false);
   const [remoteUrl, setRemoteUrl] = useState("");
   const [concurrency, setConcurrency] = useState(2);
+  const [colabUrl, setColabUrl] = useState("https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO");
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<TestGpuResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,6 +64,9 @@ export default function Settings() {
       setUseRemoteGpu(hardwareConfig.use_remote_gpu);
       setRemoteUrl(hardwareConfig.remote_gpu_url || "");
       setConcurrency(hardwareConfig.remote_concurrency || 2);
+      if (hardwareConfig.colab_notebook_url) {
+        setColabUrl(hardwareConfig.colab_notebook_url);
+      }
     }
   }, [hardwareConfig]);
 
@@ -105,6 +109,7 @@ export default function Settings() {
         use_remote_gpu: useRemoteGpu,
         remote_gpu_url: remoteUrl.trim(),
         remote_concurrency: concurrency,
+        colab_notebook_url: colabUrl.trim(),
       });
 
       if (success) {
@@ -394,21 +399,38 @@ export default function Settings() {
                 </button>
               </div>
 
-              {/* Quick Link tới Colab */}
-              <div className="flex items-center justify-between text-xs pt-1">
-                <a
-                  href="https://colab.research.google.com/github/tranvankha1989/self-tts/blob/main/notebooks/OmniVoice_Colab_T4.ipynb"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-primary hover:text-primary-hover underline underline-offset-4 font-medium transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Mở Google Colab Notebook (T4 16GB)
-                </a>
-
-                <span className="text-[11px] text-on-surface-variant">
-                  💡 Nhớ bấm <strong>Play (Run)</strong> trên Google Colab trước khi kiểm tra
-                </span>
+              {/* Cấu hình Đường dẫn Sổ tay Google Colab Cá Nhân */}
+              <div className="pt-3 border-t border-white/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-on-surface flex items-center gap-1.5">
+                    <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                    Đường Dẫn Sổ Tay Google Colab (Google Drive / GitHub Cá Nhân):
+                  </label>
+                  <a
+                    href={colabUrl.trim() || "https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary-hover underline underline-offset-4 font-semibold transition-colors"
+                  >
+                    <span>Mở sổ tay trên Colab</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <input
+                  type="text"
+                  value={colabUrl}
+                  onChange={(e) => setColabUrl(e.target.value)}
+                  placeholder="https://colab.research.google.com/drive/1QK4hoFRklcGQpgUkU_YNcDidA5y5kzgO"
+                  className="w-full bg-surface-container-lowest/80 border border-white/10 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-on-surface font-mono placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all"
+                />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-on-surface-variant gap-1">
+                  <span>
+                    💡 Bạn có thể dán link Google Colab riêng của bạn vào đây. Khi chuyển máy tính khác, hệ thống sẽ tự động ghi nhớ và mở đúng sổ tay này.
+                  </span>
+                  <span className="shrink-0 text-primary font-medium">
+                    Nhớ bấm <strong>Play (Run)</strong> trên Colab trước
+                  </span>
+                </div>
               </div>
 
               {/* Banner Kết quả Test Ping */}
