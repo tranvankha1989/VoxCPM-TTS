@@ -20,13 +20,12 @@ router = APIRouter(tags=["System"])
     summary="Kiểm tra trạng thái máy chủ và mô hình (hỗ trợ Tray Manager)",
 )
 async def health_check():
-    """Kiểm tra server đang hoạt động và OmniVoice đã sẵn sàng (local hoặc Remote GPU)."""
+    """Kiểm tra server đang hoạt động và OmniVoice đã sẵn sàng (local Model nạp xong HOẶC Remote GPU online)."""
     import model_handler
-    is_remote = getattr(model_handler, "USE_REMOTE_GPU", False)
-    is_loaded = getattr(model_handler, "_model", None) is not None or is_remote
+    is_ready = model_handler.is_system_ai_ready()
     return HealthResponse(
         status="ok",
-        model_loaded=is_loaded,
+        model_loaded=is_ready,
     )
 
 

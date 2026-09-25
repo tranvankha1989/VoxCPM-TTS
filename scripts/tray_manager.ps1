@@ -217,7 +217,7 @@ $timer.add_Tick({
         try {
             $r = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/health' -TimeoutSec 1 -ErrorAction Stop
             if ($r.status -eq 'ok' -and $r.model_loaded -eq $true) {
-                Write-Host "AI Model da san sang! Dang mo trinh duyet..." -ForegroundColor Green
+                Write-Host "⚡ Cloud GPU / AI Model da ket noi thanh cong! Dang mo trinh duyet Web..." -ForegroundColor Green
                 Start-Process "http://localhost:5173"
                 $notifyIcon.Text = "OmniVoice TTS (Đang hoạt động)"
                 $script:browserOpened = $true

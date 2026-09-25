@@ -166,6 +166,12 @@ if !errorlevel! equ 0 (
     )
 )
 
-start "" "http://localhost:8000"
+echo [INFO] He thong dang cho ket noi AI Model / Cloud GPU...
+echo [INFO] Trinh duyet Web se TU DONG MO ngay khi GPU san sang hoat dong!
+echo.
+
+:: Khoi chay luong ngam cho den khi GPU / Model san sang roi moi bat trinh duyet
+start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$opened = $false; for ($i=0; $i -lt 300; $i++) { Start-Sleep -Seconds 2; try { $r = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/health' -TimeoutSec 2 -ErrorAction Stop; if ($r.status -eq 'ok' -and $r.model_loaded -eq $true) { Start-Process 'http://localhost:8000'; $opened = $true; break } } catch {} }; if (-not $opened) { Start-Process 'http://localhost:8000' }"
+
 cd /d "%BACKEND_DIR%"
 "%PYTHON_EXE%" -m uvicorn main:app --host 0.0.0.0 --port 8000
